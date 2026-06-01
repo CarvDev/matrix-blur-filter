@@ -27,27 +27,27 @@ OU:
 
 1. Clone o repositório:
    ```bash
-git clone 'https://github.com/CarvDev/matrix-blur-filter.git'
-cd matrix-blur-filter
-```
+   git clone 'https://github.com/CarvDev/matrix-blur-filter.git'
+   cd matrix-blur-filter
+   ```
 
 2. Construa a imagem Docker:
    ```bash
-docker build -t matrix-blur-app .
-```
+   docker build -t matrix-blur-app .
+   ```
 
 3. Inicie o container:
    ```bash
-docker run -d -p 3000:3000 --name blur-app matrix-blur-app
-```
+   docker run -d -p 3000:3000 --name blur-app matrix-blur-app
+   ```
 
 4. Abra no navegador:
    ```text
-http://localhost:3000
-```
+   http://localhost:3000
+   ```
 
 > Para parar e remover o container:
-> ```bash
+   ```bash
 docker stop blur-app && docker rm blur-app
 ```
 
@@ -55,24 +55,24 @@ docker stop blur-app && docker rm blur-app
 
 1. Clone o repositório:
    ```bash
-git clone 'https://github.com/CarvDev/matrix-blur-filter.git'
-cd matrix-blur-filter
-```
+   git clone 'https://github.com/CarvDev/matrix-blur-filter.git'
+   cd matrix-blur-filter
+   ```
 
 2. Instale as dependências Node.js:
    ```bash
-npm install
-```
+   npm install
+   ```
 
 3. Compile e execute o servidor:
    ```bash
-make run
-```
+   make run
+   ```
 
 4. Abra no navegador:
    ```text
-http://localhost:3000
-```
+   http://localhost:3000
+   ```
 
 ## Comandos úteis
 
