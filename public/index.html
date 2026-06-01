@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Blur Filter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #6B8ECA;
+            --primary-hover: #5A7BB5;
+            --bg: #F4F7FA;
+            --surface: #FFFFFF;
+            --text-main: #2D3748;
+            --text-muted: #718096;
+            --border: #E2E8F0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header com link do GitHub */
+        header {
+            display: flex;
+            justify-content: flex-end;
+            padding: 1.5rem 2rem;
+        }
+
+        .github-link {
+            color: var(--text-main);
+            font-size: 1.8rem;
+            transition: color 0.3s ease;
+        }
+
+        .github-link:hover {
+            color: var(--primary);
+        }
+
+        /* Layout Principal */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .app-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3rem;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        /* Cartões de Upload e Resultado */
+        .card-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .card-title {
+            font-weight: 500;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        .card {
+            width: 320px;
+            height: 320px;
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Área de Upload Específica */
+        .upload-area {
+            border: 2px dashed #CBD5E1;
+            cursor: pointer;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--primary);
+            background-color: #F8FAFC;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .upload-area:hover .upload-icon {
+            color: var(--primary);
+        }
+
+        .upload-text {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            text-align: center;
+            padding: 0 2rem;
+        }
+
+        /* Imagens (Preview e Resultado) */
+        .preview-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 10;
+            display: none;
+        }
+
+        .result-area {
+            border: 1px solid var(--border);
+            background: repeating-linear-gradient(
+                45deg,
+                #f8f9fa,
+                #f8f9fa 10px,
+                #ffffff 10px,
+                #ffffff 20px
+            );
+        }
+
+        .result-text {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            z-index: 1;
+        }
+
+        /* Coluna Central (Status e Botão) */
+        .center-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            width: 200px;
+        }
+
+        .status-text {
+            font-weight: 500;
+            color: var(--text-muted);
+            text-align: center;
+            min-height: 1.5em;
+        }
+
+        .btn-iniciar {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 32px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(107, 142, 202, 0.3);
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn-iniciar:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(107, 142, 202, 0.4);
+        }
+
+        .btn-iniciar:disabled {
+            background-color: #CBD5E1;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Ocultar o input de arquivo original */
+        #fileInput {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="https://github.com/CarvDev/matrix-blur-filter" target="_blank" class="github-link" title="Ver repositório no GitHub">
+            <i class="fa-brands fa-github"></i>
+        </a>
+    </header>
+
+    <main>
+        <div class="app-container">
+            
+            <div class="card-container">
+                <span class="card-title">Upload</span>
+                <div class="card upload-area" id="dropZone">
+                    <i class="fa-solid fa-arrow-up-from-bracket upload-icon"></i>
+                    <p class="upload-text">Arraste e solte o arquivo de imagem<br>ou clique para carregar</p>
+                    <img id="imagePreview" class="preview-img" alt="Preview da imagem">
+                    <input type="file" id="fileInput" accept="image/*">
+                </div>
+            </div>
+
+            <div class="center-col">
+                <div class="status-text" id="statusMessage">Aguardando imagem...</div>
+                <button class="btn-iniciar" id="btnIniciar" disabled>INICIAR</button>
+            </div>
+
+            <div class="card-container">
+                <span class="card-title">Resultado</span>
+                <div class="card result-area">
+                    <span class="result-text" id="resultPlaceholder">Seu resultado aparecerá aqui</span>
+                    <img id="imageResult" class="preview-img" alt="Resultado do Blur">
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const imageResult = document.getElementById('imageResult');
+        const resultPlaceholder = document.getElementById('resultPlaceholder');
+        const btnIniciar = document.getElementById('btnIniciar');
+        const statusMessage = document.getElementById('statusMessage');
+        
+        let selectedFile = null;
+
+        // Abrir seletor de arquivos ao clicar na área
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        // Eventos de Drag & Drop
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            
+            if (e.dataTransfer.files.length > 0) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        // Evento de seleção via clique
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        // Lidar com o arquivo selecionado
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Por favor, selecione um arquivo de imagem válido.');
+                return;
+            }
+
+            selectedFile = file;
+            
+            // Criar URL local para preview
+            const objectUrl = URL.createObjectURL(file);
+            imagePreview.src = objectUrl;
+            imagePreview.style.display = 'block';
+            
+            // Resetar o resultado anterior
+            imageResult.style.display = 'none';
+            imageResult.src = '';
+            resultPlaceholder.style.display = 'block';
+
+            btnIniciar.disabled = false;
+            statusMessage.style.color = 'var(--text-muted)';
+            statusMessage.innerText = 'Pronto para iniciar';
+        }
+
+        // Lógica de envio para o Backend
+        btnIniciar.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
+            // Prepara a imagem num FormData para o envio HTTP
+            const formData = new FormData();
+            formData.append('image', selectedFile);
+
+            btnIniciar.disabled = true;
+            statusMessage.style.color = 'var(--primary)';
+            statusMessage.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processando...';
+
+            try {
+                // Chama a rota do seu backend Node.js
+                const response = await fetch('/aplicar-blur', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.erro || 'Falha no processamento.');
+                }
+
+                // Exibir resultado (O backend deve retornar o caminho do arquivo convertido para web)
+                // O timestamp (?t=...) evita que o navegador use cache se o nome do arquivo for o mesmo
+                imageResult.src = `${data.arquivo}?t=${new Date().getTime()}`;
+                
+                // Assim que a imagem carregar, mostra ela
+                imageResult.onload = () => {
+                    imageResult.style.display = 'block';
+                    resultPlaceholder.style.display = 'none';
+                    statusMessage.style.color = '#10B981'; // Verde sucesso
+                    statusMessage.innerText = 'Concluído!';
+                    btnIniciar.disabled = false;
+                };
+
+            } catch (error) {
+                statusMessage.style.color = '#EF4444'; // Vermelho erro
+                statusMessage.innerText = error.message;
+                btnIniciar.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
