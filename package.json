@@ -1,0 +1,26 @@
+{
+  "name": "matrix-blur-filter",
+  "version": "1.0.0",
+  "description": "Este projeto apresenta uma aplicação prática de matrizes e álgebra linear no campo da computação gráfica, através da implementação de um filtro de desfoque (*blur*) em imagens digitais no formato **PPM (P6)**. O desenvolvimento foi concebido utilizando uma lógica de processamento de baixo nível inspirada na arquitetura do framework multimedia **FFmpeg**.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CarvDev/matrix-blur-filter.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/CarvDev/matrix-blur-filter/issues"
+  },
+  "homepage": "https://github.com/CarvDev/matrix-blur-filter#readme",
+  "dependencies": {
+    "express": "^5.2.1",
+    "multer": "^2.1.1"
+  }
+}
