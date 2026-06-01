@@ -38,40 +38,67 @@ $$\text{NovoPixel}_{R,G,B} = \frac{1}{9} \sum_{i=-1}^{1} \sum_{j=-1}^{1} \text{V
 
 O resultado final é imediatamente projetado na célula correspondente do buffer de escrita.
 
-## Pré-requisitos e Compilação
+## Como Executar
 
-Para compilar e executar este projeto, necessita de um compilador C padrão (como o `gcc`) instalado no ambiente.
+Você pode executar a aplicação de duas formas: utilizando o Docker (recomendado para garantir o isolamento do ambiente) ou globalmente, instalando as dependências diretamente no sistema operacional.
 
-```bash
-# Clonar o repositório
-git clone https://github.com/CarvDev/matrix-blur-filter.git
+### Opção 1: Execução via Docker (Recomendado)
+
+Certifique-se de ter o Docker instalado, o serviço em execução na sua máquina e a porta 3000 aberta. Na raiz do projeto, execute os comandos abaixo:
+
+1. **Clonar o repositório:**
+   ```bash
+git clone 'https://github.com/CarvDev/matrix-blur-filter.git'
 cd matrix-blur-filter
 
-# Compilar o programa com otimizações padrão
-gcc -O2 main.c -o matrix-blur
+```
+
+2. **Construir a imagem da aplicação:**
+   ```bash
+docker build -t matrix-blur-app .
 
 ```
 
-## Como Utilizar
-
-O programa aceita imagens no formato **PPM P6**.
-
+3. **Iniciar o container em background:**
 ```bash
-./matrix-blur imagem.ppm
+docker run -d -p 3000:3000 --name blur-app matrix-blur-app
 
 ```
 
-**Dica:** É possível converter uma imagem para ppm com o comando abaixo (requer ImageMagick)
+4. **Acessar a interface:**
+Abra o seu navegador e acesse: `http://localhost:3000`
 
+> **Nota:** Para parar e remover o servidor posteriormente, utilize `docker stop blur-app && docker rm blur-app`.
+
+---
+
+### Opção 2: Execução Global (Nativa)
+
+As instruções abaixo requerem os programas `nodejs`, `npm`, `gcc` `make` e `graphicsmagick`.
+
+1. **Clonar o repositório:**
+   ```bash
+git clone 'https://github.com/CarvDev/matrix-blur-filter.git'
+cd matrix-blur-filter
+
+```
+
+2. **Preparar o ambiente do projeto:**
+Na raiz do repositório, utilize o npm para instalar as dependências do Node.js (Express e Multer):
 ```bash
-magick input.jpg -colorspace sRGB -depth 8 -compress none ppm:output.ppm
+npm install 
+
 ```
 
-Esse comando utiliza flags específicas para forçar o formato esperado pelo programa e evitar erros.
+3. **Compilar o binário C e iniciar o servidor:**
+O comando abaixo compila o código-fonte em C com otimização máxima (`-O3`) e levanta a API Node.js em seguida:
+```bash
+make run
 
-## Resultado
+```
 
-Em caso de sucesso, o programa criará o arquivo `imagem-blur.ppm`, contendo a imagem com blur aplicado.
+4. **Acessar a interface:**
+Abra o seu navegador e acesse: `http://localhost:3000`
 
 ## Feito por:
 
