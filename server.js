@@ -33,6 +33,10 @@ app.post('/aplicar-blur', upload.single('image'), async (req, res) => {
         return res.status(400).json({ erro: "Nenhum ficheiro recebido." });
     }
 
+    // Captura o valor do kernel enviado pelo front-end.
+    // Usa parseInt para segurança (evita injeção de comandos no shell) e um fallback para 3.
+    const kernelTamanho = parseInt(req.body.kernel) || 3;
+
     const imgOriginal = req.file.path;
     const baseName = path.basename(imgOriginal, path.extname(imgOriginal));
     const dirName = path.dirname(imgOriginal);
@@ -51,17 +55,17 @@ app.post('/aplicar-blur', upload.single('image'), async (req, res) => {
     try {
         /*
          * 1. Pré-processamento
-         * A flag '-compress none' garante o formato PPM em texto puro (P3/ASCII)
-         * para simplificar o parsing da estrutura de dados dentro da memória alocada no C.
+         * GraphicsMagick vai gerar o formato P6 padrão ao exportar para "ppm:".
          */
         const cmdToPpm = `gm convert "${imgOriginal}" -background white -flatten -type TrueColor -depth 8 "ppm:${imgPpm}"`;
         await execPromise(cmdToPpm);
 
         /*
-         * 2. Processamento do Núcleo (Kernel 3x3)
+         * 2. Processamento do Núcleo (Kernel dinâmico)
+         * O parâmetro -k é injetado antes do nome do arquivo.
          * O C lê imgPpm e gera imgPpmBlur.
          */
-        const cmdRunC = `${executavelC} "${imgPpm}"`;
+        const cmdRunC = `${executavelC} -k ${kernelTamanho} "${imgPpm}"`;
         await execPromise(cmdRunC);
 
         /*

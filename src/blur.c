@@ -4,8 +4,6 @@
 #include <string.h>
 #include <ctype.h>
 
-# define TAM_KERNEL 9 // (3 = 3x3) (5 = 5x5) (9 = 9x9)
-# define TAM_PADDING ((TAM_KERNEL - 1) / 2) // Calcula o padding necessário para o kernel
 
 // Struct com tamanho suficiente para acomodar um pixel RGB
 typedef struct {
@@ -77,13 +75,32 @@ void desalocar_imagem(Pixel **imagem, size_t altura_total) {
 }
 
 int main(int argc, char *argv[]) {
+    int tam_kernel = 3; // fallback
+
     // Validação estrita da linha de comandos esperada pelo Node.js
-    if (argc != 2) {
+    if (argc < 2) {
         fprintf(stderr, "Erro de sintaxe. Uso esperado: %s <caminho_imagem.ppm>\n", argv[0]);
+        fprintf(stderr, "Opcionalmente: %s <caminho_imagem.ppm> -k <tamanho kernel>\n", argv[0]);
         return 1;
     }
 
-    const char *nome_arq_entrada = argv[1];
+    char nome_arq_entrada[256];
+    for (int i = 1; i < argc; i++) {
+        // se argv[i] for -k, então o próximo argv será o tamanho do kernel 
+        if (!strcmp(argv[i], "-k")) {
+            i++;
+            tam_kernel = atoi(argv[i]);
+        } else strcpy(nome_arq_entrada, argv[i]); // Se não for, então é o nome do arquivo
+    }
+
+    // Tratamento de erros do tamanho de kernel
+    // (o kernel tem de ser ímpar e >= 3)
+    if (tam_kernel < 3 || tam_kernel % 2 == 0) {
+        fprintf(stderr, "Erro: O tamanho do kernel deve ser um número ímpar maior ou igual a 3.\n");
+        return 1;   
+    }
+
+    size_t tam_padding = ((tam_kernel - 1) / 2); // Calcula o padding necessário para o kernel
     char nome_arq_saida[256];
 
     // Metadados da imagem
@@ -147,8 +164,8 @@ int main(int argc, char *argv[]) {
 
     // Início da lógica principal
     // Definindo altura e largura total (orignal + paddding) 
-    size_t altura_total = altura_original + (2 * TAM_PADDING);
-    size_t largura_total = largura_original + (2 * TAM_PADDING);
+    size_t altura_total = altura_original + (2 * tam_padding);
+    size_t largura_total = largura_original + (2 * tam_padding);
 
     // Alocando memória para as linhas da imagem + padding
     Pixel **imagem_lida = malloc(sizeof(Pixel*) * altura_total);
@@ -173,9 +190,9 @@ int main(int argc, char *argv[]) {
     }
 
     // Lendo os pixels da imagem, linha por linha
-    for (size_t i = TAM_PADDING; i < altura_original + TAM_PADDING; i++) {
+    for (size_t i = tam_padding; i < altura_original + tam_padding; i++) {
         // Aponta para a primeira posição útil da linha (pulando o padding esquerdo)
-        Pixel *inicio_linha_util = &imagem_lida[i][TAM_PADDING];
+        Pixel *inicio_linha_util = &imagem_lida[i][tam_padding];
         
         size_t lidos = fread(inicio_linha_util, sizeof(Pixel), largura_original, arq_entrada);
 
@@ -192,20 +209,20 @@ int main(int argc, char *argv[]) {
     for (size_t i = 0; i < altura_total; i++) {
         // Restringe o índice vertical para a linha real mais próxima
         size_t orig_i = i;
-        if (orig_i < TAM_PADDING) orig_i = TAM_PADDING;
-        if (orig_i >= altura_original + TAM_PADDING) orig_i = altura_original + TAM_PADDING - 1;
+        if (orig_i < tam_padding) orig_i = tam_padding;
+        if (orig_i >= altura_original + tam_padding) orig_i = altura_original + tam_padding - 1;
 
         for (size_t j = 0; j < largura_total; j++) {
             // Se estiver dentro do miolo original da imagem, pula a replicação
-            if (i >= TAM_PADDING && i < altura_original + TAM_PADDING &&
-                j >= TAM_PADDING && j < largura_original + TAM_PADDING) {
+            if (i >= tam_padding && i < altura_original + tam_padding &&
+                j >= tam_padding && j < largura_original + tam_padding) {
                 continue;
             }
             
             // Restringe o índice horizontal para a coluna real mais próxima
             size_t orig_j = j;
-            if (orig_j < TAM_PADDING) orig_j = TAM_PADDING;
-            if (orig_j >= largura_original + TAM_PADDING) orig_j = largura_original + TAM_PADDING - 1;
+            if (orig_j < tam_padding) orig_j = tam_padding;
+            if (orig_j >= largura_original + tam_padding) orig_j = largura_original + tam_padding - 1;
 
             // Replica a cor do píxel útil mais próximo na posição do padding
             imagem_lida[i][j] = imagem_lida[orig_i][orig_j];
@@ -241,15 +258,15 @@ int main(int argc, char *argv[]) {
         de cor do píxel central e dos seus vizinhos (que, nas extremidades, farão a leitura dos píxeis replicados no 
         padding) e gravando o resultado na posição correspondente do buffer de escrita.
     */ 
-    for (size_t i = TAM_PADDING; i < altura_original + TAM_PADDING; i++) {
-        for (size_t j = TAM_PADDING; j < largura_original + TAM_PADDING; j++) {
+    for (size_t i = tam_padding; i < altura_original + tam_padding; i++) {
+        for (size_t j = tam_padding; j < largura_original + tam_padding; j++) {
             SomaPixel soma = {0, 0, 0};
             
             /* * Varre a vizinhanca utilizando deslocamentos relativos com sinal (int),
              * permitindo caminhar para trás e para frente ao redor do píxel central.
              */
-            for (int k = -(int)TAM_PADDING; k <= (int)TAM_PADDING; k++) {
-                for (int l = -(int)TAM_PADDING; l <= (int)TAM_PADDING; l++) {
+            for (int k = -(int)tam_padding; k <= (int)tam_padding; k++) {
+                for (int l = -(int)tam_padding; l <= (int)tam_padding; l++) {
                     Pixel vizinho = imagem_lida[i + k][j + l];
                     
                     soma.r += vizinho.r;
@@ -259,7 +276,7 @@ int main(int argc, char *argv[]) {
             }
 
             // Média aritmética baseada na área total do kernel
-            unsigned int divisor = TAM_KERNEL * TAM_KERNEL;
+            unsigned int divisor = tam_kernel * tam_kernel;
             Pixel media;
             media.r = (unsigned char)(soma.r / divisor);
             media.g = (unsigned char)(soma.g / divisor);
@@ -267,10 +284,10 @@ int main(int argc, char *argv[]) {
 
             /* * Mapeamento de Coordenadas:
              * Como a imagem_final nao possui as bordas de padding, subtraímos
-             * TAM_PADDING dos índices 'i' e 'j' para normalizar a gravação a partir
+             * tam_padding dos índices 'i' e 'j' para normalizar a gravação a partir
              * da coordenada [0][0] do buffer de escrita.
              */
-            imagem_final[i - TAM_PADDING][j - TAM_PADDING] = media;
+            imagem_final[i - tam_padding][j - tam_padding] = media;
         }
     }
 
