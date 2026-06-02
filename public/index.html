@@ -58,6 +58,7 @@
             align-items: center;
             justify-content: center;
             padding: 2rem;
+            gap: 2rem;
         }
 
         .app-container {
@@ -67,6 +68,7 @@
             gap: 3rem;
             width: 100%;
             max-width: 1000px;
+            flex-wrap: wrap;
         }
 
         /* Cartões de Upload e Resultado */
@@ -235,9 +237,112 @@
             border-color: var(--primary);
         }
 
+        /* Seção de Informações de Leitura */
+        .info-section {
+            width: 100%;
+            max-width: 1000px;
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            line-height: 1.7;
+        }
+
+        .info-section h1 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 2rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        .info-section h2 {
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+            color: var(--text-main);
+            font-size: 1.4rem;
+        }
+
+        .info-section h3 {
+            margin-top: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+            font-size: 1.1rem;
+        }
+
+        .info-section p {
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .info-section strong {
+            color: var(--text-main);
+        }
+
+        /* Bloco Estilizado para a Fórmula Matemática */
+        .math-block {
+            background-color: var(--bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.1rem;
+            color: var(--text-main);
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+        }
+
+        .math-block sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .credits-list {
+            list-style: none;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        .credits-list li {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .credits-list li::before {
+            content: "•";
+            color: var(--primary);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .credits-list a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .credits-list a:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
+        }
+
         /* Ocultar o input de arquivo original */
         #fileInput {
             display: none;
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+                gap: 2rem;
+            }
+            .info-section {
+                padding: 1.5rem;
+            }
         }
     </style>
 </head>
@@ -286,6 +391,31 @@
             </div>
 
         </div>
+
+        <section class="info-section">
+            <h1>Matrix Blur Filter</h1>
+            <p>Este projeto apresenta uma aplicação prática de matrizes e álgebra linear no campo da computação gráfica, através da implementação de um filtro de desfoque (<em>blur</em>) em imagens digitais. O desenvolvimento foi concebido utilizando uma lógica de processamento de baixo nível inspirada na arquitetura do framework multimedia <strong>FFmpeg</strong>.</p>
+
+            <h2>Objetivo</h2>
+            <p>Demonstrar como conceitos abstratos de matrizes e operadores locais de convolução são aplicados diretamente na manipulação de matrizes de píxeis na memória, otimizando o processamento com técnicas avançadas de tratamento de bordas (<em>edge replication</em>).</p>
+            
+            <h3>Algoritmo de Convolução</h3>
+            <p>Um kernel de suavização bidimensional (de tamanho <strong>K &times; K</strong>) desliza linearmente sobre a imagem. Para cada coordenada do buffer, o programa calcula a média aritmética simples, unindo os canais cromáticos do píxel central aos vizinhos adjacentes contidos dentro da área espacial do kernel:</p>
+            
+            <div class="math-block">
+                NovoPixel<sub>R,G,B</sub> = (1 / K&sup2;) &sum;<sub>i=-P</sub><sup>P</sup> &sum;<sub>j=-P</sub><sup>P</sup> Vizinho(x+i, y+j)<sub>R,G,B</sub>
+                <br><br>
+                <span style="font-size: 0.85rem; color: var(--text-muted); font-family: 'Inter', sans-serif;">
+                    Sendo <strong>K</strong> a dimensão do kernel escolhida e <strong>P</strong> o deslocamento relativo a partir do centro (K-1)/2.
+                </span>
+            </div>
+
+            <h2>Feito por:</h2>
+            <ul class="credits-list">
+                <li>Arthur de Carvalho (<a href="https://github.com/CarvDev" target="_blank">CarvDev</a>)</li>
+                <li>Amanda Cardoso (<a href="https://github.com/4mandaCardoso" target="_blank">4mandaCardoso</a>)</li>
+            </ul>
+        </section>
     </main>
 
     <script>
@@ -381,8 +511,7 @@
                     throw new Error(data.erro || 'Falha no processamento.');
                 }
 
-                // Exibir resultado (O backend deve retornar o caminho do arquivo convertido para web)
-                // O timestamp (?t=...) evita que o navegador use cache se o nome do arquivo for o mesmo
+                // Exibir resultado
                 imageResult.src = `${data.arquivo}?t=${new Date().getTime()}`;
                 
                 // Assim que a imagem carregar, mostra ela
