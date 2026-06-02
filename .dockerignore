@@ -1,5 +1,0 @@
-node_modules/
-src/blur_program
-public/imagens/*
-!public/imagens/.gitkeep
-.git/
