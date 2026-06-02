@@ -112,3 +112,25 @@ app.post('/aplicar-blur', upload.single('image'), async (req, res) => {
 app.listen(3000, () => {
     console.log('Servidor Pipeline ligado na porta 3000');
 });
+
+setInterval(() => {
+    const diretorio = path.join(__dirname, 'public', 'imagens');
+    fs.readdir(diretorio, (err, files) => {
+        if (err) return;
+        const agora = Date.now();
+        
+        files.forEach(file => {
+            // Impede que o gari delete o arquivo de estrutura do Git
+            if (file === '.gitkeep') return;
+
+            const caminho = path.join(diretorio, file);
+            fs.stat(caminho, (err, stats) => {
+                if (err) return;
+                // Se o arquivo tiver mais de 10 minutos de vida, apaga
+                if (agora - stats.birthtimeMs > 10 * 60 * 1000) {
+                    fs.unlink(caminho, () => {});
+                }
+            });
+        });
+    });
+}, 60 * 60 * 1000); // Executa a varredura a cada 1 hora
