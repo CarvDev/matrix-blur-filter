@@ -1,6 +1,6 @@
 # Compilador e flags de compilação
-CC = gcc
-CFLAGS = -Wall -Wextra -O3
+CC = x86_64-redhat-linux-gcc-8
+CFLAGS = -Wall -Wextra -O2 -std=c99
 
 # Caminhos dos ficheiros
 SRC = src/blur.c
