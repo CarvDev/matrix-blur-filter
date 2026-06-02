@@ -15,13 +15,16 @@ const app = express();
  * O middleware guarda ficheiros de qualquer formato suportado pelo 
  * ImageMagick/GraphicsMagick. A conversão é feita a jusante na pipeline.
  */
+const crypto = require('crypto');
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'public/imagens/'); 
     },
     filename: (req, file, cb) => {
         const extensao = path.extname(file.originalname) || '.jpg';
-        cb(null, `upload_${Date.now()}${extensao}`); 
+        // Gera um nome como: 550e8400-e29b-41d4-a716-446655440000.jpg
+        const nomeSeguro = crypto.randomUUID(); 
+        cb(null, `${nomeSeguro}${extensao}`); 
     }
 });
 const upload = multer({ storage });
@@ -87,6 +90,13 @@ app.post('/aplicar-blur', upload.single('image'), async (req, res) => {
         fs.unlink(imgOriginal, () => {});
         fs.unlink(imgPpm, () => {});
         fs.unlink(imgPpmBlur, () => {});
+
+        // Agenda a deleção do JPG final para 5 minutos (300.000 ms)
+        setTimeout(() => {
+            fs.unlink(imgFinalJpg, (err) => {
+                if (!err) console.log(`Arquivo limpo (Timeout): ${imgFinalJpg}`);
+            });
+        }, 5 * 60 * 1000);
 
     } catch (error) {
         // Fallback de limpeza caso a pipeline falhe a meio
