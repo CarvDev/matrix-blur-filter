@@ -18,11 +18,18 @@ const app = express();
 const crypto = require('crypto');
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'public/imagens/'); 
+        // Resolve o caminho absoluto exato independente de onde o processo foi ligado
+        const diretorioAbsoluto = path.join(__dirname, 'public', 'imagens');
+        
+        // Garante dinamicamente que a pasta existe (se já existir, ele simplesmente avança)
+        if (!fs.existsSync(diretorioAbsoluto)) {
+            fs.mkdirSync(diretorioAbsoluto, { recursive: true });
+        }
+        
+        cb(null, diretorioAbsoluto); 
     },
     filename: (req, file, cb) => {
         const extensao = path.extname(file.originalname) || '.jpg';
-        // Gera um nome como: 550e8400-e29b-41d4-a716-446655440000.jpg
         const nomeSeguro = crypto.randomUUID(); 
         cb(null, `${nomeSeguro}${extensao}`); 
     }
