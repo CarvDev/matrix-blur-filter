@@ -60,7 +60,17 @@ app.post('/aplicar-blur', upload.single('image'), async (req, res) => {
     const imgPpmBlur = path.join(dirName, `${baseName}-blur.ppm`);
     const imgFinalJpg = path.join(dirName, `${baseName}-resultado.jpg`);
 
-    const executavelC = './src/blur_program';
+    const executavelC = path.join(__dirname, 'src', 'blur_program');
+
+    // Garante que o binário tem permissão de execução (755) assim que o servidor liga
+    if (fs.existsSync(executavelC)) {
+        try {
+            fs.chmodSync(executavelC, '755');
+            console.log('Permissões de execução do binário de blur confirmadas.');
+        } catch (err) {
+            console.error('Falha ao definir permissão do binário:', err);
+        }
+    }
 
     try {
         /*
