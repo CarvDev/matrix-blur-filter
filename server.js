@@ -57,7 +57,7 @@ app.post('/aplicar-blur', upload.single('image'), async (req, res) => {
          * 1. Pré-processamento
          * GraphicsMagick vai gerar o formato P6 padrão ao exportar para "ppm:".
          */
-        const cmdToPpm = `gm convert "${imgOriginal}" -background white -flatten -type TrueColor -depth 8 "ppm:${imgPpm}"`;
+        const cmdToPpm = `gm convert "${imgOriginal}" -auto-orient -background white -flatten -type TrueColor -depth 8 "ppm:${imgPpm}"`;
         await execPromise(cmdToPpm);
 
         /*
