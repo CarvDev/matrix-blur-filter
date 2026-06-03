@@ -90,7 +90,7 @@ app.post('/aplicar-blur', upload.single('image'), async (req, res) => {
          * Os artefactos intermédios (.ppm) e a origem devem ser removidos 
          * para evitar sobrecarga de inodes. O JPG é retido para servir o pedido do Frontend.
          */
-        const caminhoWeb = imgFinalJpg.replace(/^public[\/\\]/, '/');
+        const caminhoWeb = `/imagens/${baseName}-resultado.jpg`;
         res.json({ arquivo: caminhoWeb });
 
         // Limpeza assíncrona em background
